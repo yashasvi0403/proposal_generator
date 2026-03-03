@@ -1,24 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Create Proposal</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <!-- ✅ Correct GitHub Pages CSS Path -->
+  <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
 
-<div class="glass-card">
-  <h2>🧠 Build Your Proposal</h2>
+  <!-- Neural Background -->
+  <canvas id="network"></canvas>
 
-  <input id="title" placeholder="Project Title">
-  <input id="industry" placeholder="Industry">
-  <input id="duration" type="number" placeholder="Duration (months)">
-  <input id="users" type="number" placeholder="Expected Users">
-  <input id="tech" placeholder="Tech Stack (comma separated)">
+  <div class="glass-card">
 
-<button onclick="generate()">Generate with AI</button>
-<div id="loader" class="loader hidden"></div>
-</div>
+    <h2>🧠 Build Your Proposal</h2>
 
-<script src="js/app.js"></script>
+    <input id="title" placeholder="Project Title" required>
+
+    <input id="industry" placeholder="Industry" required>
+
+    <input id="duration"
+           type="number"
+           placeholder="Duration (months)"
+           required>
+
+    <input id="users"
+           type="number"
+           placeholder="Expected Users"
+           required>
+
+    <input id="tech"
+           placeholder="Tech Stack (comma separated)"
+           required>
+
+    <button onclick="generate()">
+      Generate with AI
+    </button>
+
+    <!-- Loader -->
+    <div id="loader" class="loader hidden"></div>
+
+  </div>
+
+  <!-- ✅ Correct JS Path -->
+  <script src="./app.js"></script>
+
 </body>
 </html>
