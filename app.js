@@ -2,13 +2,12 @@
 // CONFIG (PRODUCTION BACKEND)
 // =====================================
 
-// ✅ HuggingFace Backend URL
 const API_BASE =
-"https://yashasvi0409-proposal-generator.hf.space";
+  "https://yashasvi0409-proposal-generator.hf.space";
 
 
 // =====================================
-// Generate Proposal
+// GENERATE PROPOSAL
 // =====================================
 
 async function generate() {
@@ -50,7 +49,7 @@ async function generate() {
     );
 
     if (!response.ok)
-      throw new Error("API Error");
+      throw new Error("Backend Error");
 
     const result = await response.json();
 
@@ -59,7 +58,7 @@ async function generate() {
       JSON.stringify(result)
     );
 
-    // ✅ GitHub Pages safe navigation
+    // ✅ GitHub Pages SAFE PATH
     window.location.href =
       "/proposal_generator/result.html";
 
@@ -78,20 +77,16 @@ async function generate() {
 
 
 // =====================================
-// Result Page Rendering
+// RESULT PAGE RENDERING (FIXED)
 // =====================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const output =
-    document.getElementById("output");
-
+  const output = document.getElementById("output");
   if (!output) return;
 
   const proposal =
-    JSON.parse(
-      localStorage.getItem("proposal")
-    );
+    JSON.parse(localStorage.getItem("proposal"));
 
   if (!proposal) {
     output.innerHTML =
@@ -99,59 +94,27 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  function typeEffect(el, text, speed = 20) {
-
-    let i = 0;
-    el.innerHTML = "";
-
-    function typing() {
-      if (i < text.length) {
-        el.innerHTML += text.charAt(i++);
-        setTimeout(typing, speed);
-      }
-    }
-
-    typing();
+  // ✅ FORMAT AI TEXT PROPERLY
+  function formatText(text) {
+    if (!text) return "";
+    return text
+      .replace(/\n/g, "<br><br>")
+      .replace(/•/g, "<br>• ");
   }
 
   output.innerHTML = `
     <h3>Executive Summary</h3>
-    <p id="summary"></p>
+    <p>${formatText(proposal.executive_summary)}</p>
 
     <h3>Technical Approach</h3>
-    <p id="tech"></p>
+    <p>${formatText(proposal.technical_approach)}</p>
 
     <h3>Timeline</h3>
-    <p id="timeline"></p>
+    <p>${formatText(proposal.timeline)}</p>
 
     <h3>Risk Assessment</h3>
-    <p id="risk"></p>
-  `;
+    <p>${formatText(proposal.risk_assessment)}</p>
 
-  typeEffect(
-    document.getElementById("summary"),
-    proposal.executive_summary || ""
-  );
-
-  setTimeout(() =>
-    typeEffect(
-      document.getElementById("tech"),
-      proposal.technical_approach || ""
-    ), 800);
-
-  setTimeout(() =>
-    typeEffect(
-      document.getElementById("timeline"),
-      proposal.timeline || ""
-    ), 1600);
-
-  setTimeout(() =>
-    typeEffect(
-      document.getElementById("risk"),
-      proposal.risk_assessment || ""
-    ), 2400);
-
-  output.innerHTML += `
     <div class="cost-grid">
 
       <div class="cost-card">
@@ -180,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // =====================================
-// Neural Network Background
+// NEURAL NETWORK BACKGROUND
 // =====================================
 
 const canvas = document.getElementById("network");
