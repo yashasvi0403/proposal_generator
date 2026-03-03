@@ -1,67 +1,79 @@
 // =====================================
-// CONFIG (IMPORTANT)
+// CONFIG (PRODUCTION BACKEND)
 // =====================================
 
-// LOCAL BACKEND (for development)
-const LOCAL_API = "http://127.0.0.1:8000";
-
-// 👉 AFTER DEPLOYING BACKEND CHANGE THIS:
-// const LOCAL_API = "https://your-render-url.onrender.com";
+// ✅ HuggingFace Backend URL
+const API_BASE =
+"https://yashasvi0409-proposal-generator.hf.space";
 
 
 // =====================================
 // Generate Proposal
 // =====================================
 
-function generate() {
+async function generate() {
 
   const loader = document.getElementById("loader");
   if (loader) loader.classList.remove("hidden");
 
   const data = {
-    project_title: document.getElementById("title").value,
-    industry: document.getElementById("industry").value,
-    duration_months: Number(document.getElementById("duration").value),
-    expected_users: Number(document.getElementById("users").value),
-    tech_stack: document.getElementById("tech").value
-      .split(",")
-      .map(t => t.trim())
+    project_title:
+      document.getElementById("title").value,
+
+    industry:
+      document.getElementById("industry").value,
+
+    duration_months:
+      Number(document.getElementById("duration").value),
+
+    expected_users:
+      Number(document.getElementById("users").value),
+
+    tech_stack:
+      document.getElementById("tech")
+        .value
+        .split(",")
+        .map(t => t.trim())
   };
 
-  fetch(`${LOCAL_API}/generate-proposal`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-  .then(async response => {
+  try {
 
-    if (!response.ok) {
-      throw new Error("Server error");
-    }
+    const response = await fetch(
+      `${API_BASE}/generate-proposal`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      }
+    );
 
-    return response.json();
-  })
-  .then(res => {
+    if (!response.ok)
+      throw new Error("API Error");
+
+    const result = await response.json();
 
     localStorage.setItem(
       "proposal",
-      JSON.stringify(res)
+      JSON.stringify(result)
     );
 
-    window.location.href = "./result.html";
-  })
-  .catch(err => {
+    // ✅ GitHub Pages safe navigation
+    window.location.href =
+      "/proposal_generator/result.html";
+
+  } catch (err) {
 
     console.error(err);
 
     alert(
-      "⚠ Backend not connected.\n\nRun FastAPI locally OR deploy backend."
+      "⚠ Backend connection failed.\nPlease try again."
     );
 
-    if (loader) loader.classList.add("hidden");
-  });
+    if (loader)
+      loader.classList.add("hidden");
+  }
 }
 
 
@@ -71,11 +83,15 @@ function generate() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const output = document.getElementById("output");
+  const output =
+    document.getElementById("output");
+
   if (!output) return;
 
   const proposal =
-    JSON.parse(localStorage.getItem("proposal"));
+    JSON.parse(
+      localStorage.getItem("proposal")
+    );
 
   if (!proposal) {
     output.innerHTML =
@@ -84,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function typeEffect(el, text, speed = 20) {
+
     let i = 0;
     el.innerHTML = "";
 
@@ -113,55 +130,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
   typeEffect(
     document.getElementById("summary"),
-    proposal.executive_summary
+    proposal.executive_summary || ""
   );
 
   setTimeout(() =>
     typeEffect(
       document.getElementById("tech"),
-      proposal.technical_approach
+      proposal.technical_approach || ""
     ), 800);
 
   setTimeout(() =>
     typeEffect(
       document.getElementById("timeline"),
-      proposal.timeline
+      proposal.timeline || ""
     ), 1600);
 
   setTimeout(() =>
     typeEffect(
       document.getElementById("risk"),
-      proposal.risk_assessment
+      proposal.risk_assessment || ""
     ), 2400);
 
   output.innerHTML += `
     <div class="cost-grid">
+
       <div class="cost-card">
         Development<br>
-        $${proposal.estimated_cost.development_cost}
+        $${proposal.estimated_cost?.development_cost ?? 0}
       </div>
 
       <div class="cost-card">
         Infrastructure<br>
-        $${proposal.estimated_cost.infrastructure_cost}
+        $${proposal.estimated_cost?.infrastructure_cost ?? 0}
       </div>
 
       <div class="cost-card">
         Contingency<br>
-        $${proposal.estimated_cost.contingency}
+        $${proposal.estimated_cost?.contingency ?? 0}
       </div>
 
       <div class="cost-card total">
         Total<br>
-        $${proposal.estimated_cost.total_estimated_cost}
+        $${proposal.estimated_cost?.total_estimated_cost ?? 0}
       </div>
+
     </div>
   `;
 });
 
 
 // =====================================
-// Neural Network Background Animation
+// Neural Network Background
 // =====================================
 
 const canvas = document.getElementById("network");
@@ -178,12 +197,13 @@ if (canvas) {
   resize();
   window.addEventListener("resize", resize);
 
-  const particles = Array.from({ length: 100 },
+  const particles = Array.from(
+    { length: 100 },
     () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      dx: (Math.random() - 0.5),
-      dy: (Math.random() - 0.5)
+      dx: Math.random() - 0.5,
+      dy: Math.random() - 0.5
     })
   );
 
