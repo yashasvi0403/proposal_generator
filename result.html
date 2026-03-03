@@ -1,26 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Your Proposal</title>
-  <link rel="stylesheet" href="css/style.css">
+
+  <!-- ✅ GitHub Pages Correct CSS -->
+  <link rel="stylesheet" href="/proposal_generator/style.css">
 
   <!-- Markdown Formatter -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- PDF Generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 </head>
 
 <body>
 
+<!-- Neural Background -->
+<canvas id="network"></canvas>
+
 <div class="glass-card wide">
+
   <h2>🚀 Generated Proposal</h2>
 
-  <button onclick="downloadPDF()">Download PDF</button>
+  <button onclick="downloadPDF()" class="neon-btn">
+    Download PDF
+  </button>
 
   <div id="output"></div>
+
 </div>
 
 
@@ -28,81 +39,95 @@
 
 const output = document.getElementById("output");
 
-// ✅ safely read storage
+// ===============================
+// LOAD PROPOSAL FROM STORAGE
+// ===============================
+
 const storedProposal = localStorage.getItem("proposal");
 
 if (!storedProposal) {
 
-    output.innerHTML = `
-        <p style="color:orange">
-        ⚠ No proposal found.<br>
-        Please generate proposal again.
-        </p>
-    `;
+  output.innerHTML = `
+    <p style="color:orange">
+      ⚠ No proposal found.<br>
+      Please generate proposal again.
+    </p>
+  `;
 
 } else {
 
-    const proposal = JSON.parse(storedProposal);
+  const proposal = JSON.parse(storedProposal);
 
-    output.innerHTML = `
-        <h3>Executive Summary</h3>
-        ${marked.parse(proposal.executive_summary || "")}
+  output.innerHTML = `
+    <h3>Executive Summary</h3>
+    ${marked.parse(proposal.executive_summary || "")}
 
-        <h3>Technical Approach</h3>
-        ${marked.parse(proposal.technical_approach || "")}
+    <h3>Technical Approach</h3>
+    ${marked.parse(proposal.technical_approach || "")}
 
-        <h3>Timeline</h3>
-        ${marked.parse(proposal.timeline || "")}
+    <h3>Timeline</h3>
+    ${marked.parse(proposal.timeline || "")}
 
-        <h3>Risk Assessment</h3>
-        ${marked.parse(proposal.risk_assessment || "")}
+    <h3>Risk Assessment</h3>
+    ${marked.parse(proposal.risk_assessment || "")}
 
-        <h3>Estimated Cost</h3>
+    <h3>Estimated Cost</h3>
 
-        <div class="cost-grid">
-            <div class="cost-card">
-                Development<br>
-                $${proposal.estimated_cost?.development_cost ?? 0}
-            </div>
+    <div class="cost-grid">
 
-            <div class="cost-card">
-                Infrastructure<br>
-                $${proposal.estimated_cost?.infrastructure_cost ?? 0}
-            </div>
+      <div class="cost-card">
+        Development<br>
+        $${proposal.estimated_cost?.development_cost ?? 0}
+      </div>
 
-            <div class="cost-card">
-                Contingency<br>
-                $${proposal.estimated_cost?.contingency ?? 0}
-            </div>
+      <div class="cost-card">
+        Infrastructure<br>
+        $${proposal.estimated_cost?.infra_structure_cost ?? 
+           proposal.estimated_cost?.infrastructure_cost ?? 0}
+      </div>
 
-            <div class="cost-card total">
-                Total<br>
-                $${proposal.estimated_cost?.total_estimated_cost ?? 0}
-            </div>
-        </div>
-    `;
+      <div class="cost-card">
+        Contingency<br>
+        $${proposal.estimated_cost?.contingency ?? 0}
+      </div>
+
+      <div class="cost-card total">
+        Total<br>
+        $${proposal.estimated_cost?.total_estimated_cost ?? 0}
+      </div>
+
+    </div>
+  `;
 }
 
 
 // ===============================
 // PDF DOWNLOAD
 // ===============================
+
 function downloadPDF() {
 
-    const element = document.getElementById("output");
+  const element = document.getElementById("output");
 
-    html2pdf()
-        .set({
-            margin: 10,
-            filename: "AI_Proposal.pdf",
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-        })
-        .from(element)
-        .save();
+  html2pdf()
+    .set({
+      margin: 10,
+      filename: "AI_Proposal.pdf",
+      html2canvas: { scale: 2 },
+      jsPDF: {
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      }
+    })
+    .from(element)
+    .save();
 }
 
 </script>
+
+<!-- ✅ Background Animation -->
+<script src="/proposal_generator/app.js"></script>
 
 </body>
 </html>
