@@ -1,6 +1,17 @@
-// ===============================
+// =====================================
+// CONFIG (IMPORTANT)
+// =====================================
+
+// LOCAL BACKEND (for development)
+const LOCAL_API = "http://127.0.0.1:8000";
+
+// 👉 AFTER DEPLOYING BACKEND CHANGE THIS:
+// const LOCAL_API = "https://your-render-url.onrender.com";
+
+
+// =====================================
 // Generate Proposal
-// ===============================
+// =====================================
 
 function generate() {
 
@@ -10,119 +21,191 @@ function generate() {
   const data = {
     project_title: document.getElementById("title").value,
     industry: document.getElementById("industry").value,
-    duration_months: +document.getElementById("duration").value,
-    expected_users: +document.getElementById("users").value,
-    tech_stack: document.getElementById("tech").value.split(",")
+    duration_months: Number(document.getElementById("duration").value),
+    expected_users: Number(document.getElementById("users").value),
+    tech_stack: document.getElementById("tech").value
+      .split(",")
+      .map(t => t.trim())
   };
 
-  fetch("http://127.0.0.1:8000/generate-proposal", {
+  fetch(`${LOCAL_API}/generate-proposal`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(data)
   })
-  .then(r => r.json())
+  .then(async response => {
+
+    if (!response.ok) {
+      throw new Error("Server error");
+    }
+
+    return response.json();
+  })
   .then(res => {
-    localStorage.setItem("proposal", JSON.stringify(res));
-    location.href = "result.html";
+
+    localStorage.setItem(
+      "proposal",
+      JSON.stringify(res)
+    );
+
+    window.location.href = "./result.html";
   })
   .catch(err => {
-    alert("Error generating proposal.");
+
     console.error(err);
+
+    alert(
+      "⚠ Backend not connected.\n\nRun FastAPI locally OR deploy backend."
+    );
+
+    if (loader) loader.classList.add("hidden");
   });
 }
 
 
-// ===============================
+// =====================================
 // Result Page Rendering
-// ===============================
+// =====================================
 
-if (document.getElementById("output")) {
+document.addEventListener("DOMContentLoaded", () => {
 
-  const r = JSON.parse(localStorage.getItem("proposal"));
-  const out = document.getElementById("output");
+  const output = document.getElementById("output");
+  if (!output) return;
 
-  if (!r) {
-    out.innerHTML = "<p>No proposal data found.</p>";
-  } else {
+  const proposal =
+    JSON.parse(localStorage.getItem("proposal"));
 
-    function typeEffect(element, text, speed) {
-      let i = 0;
-      function typing() {
-        if (i < text.length) {
-          element.innerHTML += text.charAt(i);
-          i++;
-          setTimeout(typing, speed);
-        }
+  if (!proposal) {
+    output.innerHTML =
+      "<p>No proposal data found.</p>";
+    return;
+  }
+
+  function typeEffect(el, text, speed = 20) {
+    let i = 0;
+    el.innerHTML = "";
+
+    function typing() {
+      if (i < text.length) {
+        el.innerHTML += text.charAt(i++);
+        setTimeout(typing, speed);
       }
-      typing();
     }
 
-    out.innerHTML = `
-      <h3>Executive Summary</h3><p id="summary"></p>
-      <h3>Technical Approach</h3><p id="tech"></p>
-      <h3>Timeline</h3><p id="timeline"></p>
-      <h3>Risk Assessment</h3><p id="risk"></p>
-    `;
-
-    typeEffect(document.getElementById("summary"), r.executive_summary, 20);
-    setTimeout(() => typeEffect(document.getElementById("tech"), r.technical_approach, 15), 800);
-    setTimeout(() => typeEffect(document.getElementById("timeline"), r.timeline, 15), 1600);
-    setTimeout(() => typeEffect(document.getElementById("risk"), r.risk_assessment, 15), 2400);
-
-    // Cost Cards
-    out.innerHTML += `
-      <div class="cost-grid">
-        <div class="cost-card">
-          Development<br>$${r.estimated_cost.development_cost}
-        </div>
-        <div class="cost-card">
-          Infrastructure<br>$${r.estimated_cost.infrastructure_cost}
-        </div>
-        <div class="cost-card">
-          Contingency<br>$${r.estimated_cost.contingency}
-        </div>
-        <div class="cost-card total">
-          Total<br>$${r.estimated_cost.total_estimated_cost}
-        </div>
-      </div>
-    `;
+    typing();
   }
-}
+
+  output.innerHTML = `
+    <h3>Executive Summary</h3>
+    <p id="summary"></p>
+
+    <h3>Technical Approach</h3>
+    <p id="tech"></p>
+
+    <h3>Timeline</h3>
+    <p id="timeline"></p>
+
+    <h3>Risk Assessment</h3>
+    <p id="risk"></p>
+  `;
+
+  typeEffect(
+    document.getElementById("summary"),
+    proposal.executive_summary
+  );
+
+  setTimeout(() =>
+    typeEffect(
+      document.getElementById("tech"),
+      proposal.technical_approach
+    ), 800);
+
+  setTimeout(() =>
+    typeEffect(
+      document.getElementById("timeline"),
+      proposal.timeline
+    ), 1600);
+
+  setTimeout(() =>
+    typeEffect(
+      document.getElementById("risk"),
+      proposal.risk_assessment
+    ), 2400);
+
+  output.innerHTML += `
+    <div class="cost-grid">
+      <div class="cost-card">
+        Development<br>
+        $${proposal.estimated_cost.development_cost}
+      </div>
+
+      <div class="cost-card">
+        Infrastructure<br>
+        $${proposal.estimated_cost.infrastructure_cost}
+      </div>
+
+      <div class="cost-card">
+        Contingency<br>
+        $${proposal.estimated_cost.contingency}
+      </div>
+
+      <div class="cost-card total">
+        Total<br>
+        $${proposal.estimated_cost.total_estimated_cost}
+      </div>
+    </div>
+  `;
+});
 
 
-// ===============================
-// Neural Network Background
-// ===============================
+// =====================================
+// Neural Network Background Animation
+// =====================================
 
 const canvas = document.getElementById("network");
 
 if (canvas) {
 
   const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
 
-  let particles = [];
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
 
-  for (let i = 0; i < 100; i++) {
-    particles.push({
+  resize();
+  window.addEventListener("resize", resize);
+
+  const particles = Array.from({ length: 100 },
+    () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       dx: (Math.random() - 0.5),
       dy: (Math.random() - 0.5)
-    });
-  }
+    })
+  );
 
   function animate() {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
     particles.forEach(p => {
+
       p.x += p.dx;
       p.y += p.dy;
 
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      if (p.x < 0 || p.x > canvas.width)
+        p.dx *= -1;
+
+      if (p.y < 0 || p.y > canvas.height)
+        p.dy *= -1;
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
